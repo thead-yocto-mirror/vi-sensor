@@ -816,29 +816,37 @@ static RESULT SC132GS_IsiSensorSetStreamingIss
         return RET_WRONG_STATE;
 
     int32_t enable = (uint32_t) on;
-    ret = SC132GS_IsiRegisterWriteIss(handle, 0x3800, 0x00);
-    if (ret != 0) {
-        return (RET_FAILURE);
-    }
 
-    ret = SC132GS_IsiRegisterWriteIss(handle, 0x3817, 0x01);
-    if (ret != 0) {
-        return (RET_FAILURE);
-    }
+    if (on == 0) {
+        ret = SC132GS_IsiRegisterWriteIss(handle, 0x3800, 0x00);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
 
-    ret = SC132GS_IsiRegisterWriteIss(handle, 0x100, on);
-    if (ret != 0) {
-        return (RET_FAILURE);
-    }
+        ret = SC132GS_IsiRegisterWriteIss(handle, 0x3817, 0x01);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
 
-    ret = SC132GS_IsiRegisterWriteIss(handle, 0x3800, 0x10);
-    if (ret != 0) {
-        return (RET_FAILURE);
-    }
+        ret = SC132GS_IsiRegisterWriteIss(handle, 0x100, on);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
 
-    ret = SC132GS_IsiRegisterWriteIss(handle, 0x3800, 0x40);
-    if (ret != 0) {
-        return (RET_FAILURE);
+        ret = SC132GS_IsiRegisterWriteIss(handle, 0x3800, 0x10);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
+
+        ret = SC132GS_IsiRegisterWriteIss(handle, 0x3800, 0x40);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
+    } else {
+        ret = SC132GS_IsiRegisterWriteIss(handle, 0x100, on);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
     }
 
     pSC132GSCtx->Streaming = on;

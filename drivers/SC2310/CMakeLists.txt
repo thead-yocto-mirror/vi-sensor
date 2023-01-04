@@ -28,7 +28,8 @@ add_custom_target(${module}.drv
                   DEPENDS ${module}
                   COMMENT "Copying ${module} driver module"
                   )
-    
+target_link_libraries(${module} ${DEPEND_LIBS} )
+add_dependencies(${module} ${DEPEND_LIBS})
 #install(FILES       ${LIB_ROOT}/${CMAKE_BUILD_TYPE}/lib/lib${module}.so.${${module}_INTERFACE_CURRENT}
 #                  DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
 #                  RENAME      ${module}.drv

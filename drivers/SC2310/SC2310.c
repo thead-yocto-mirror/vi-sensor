@@ -1,6 +1,3 @@
-/******************************************************************************\ |* Copyright (c) 2020 by VeriSilicon Holdings Co., Ltd. ("VeriSilicon")       *| |* All Rights Reserved.                                                       *| |*                                                                            *| |* The material in this file is confidential and contains trade secrets of    *| |* of VeriSilicon.  This is proprietary information owned or licensed by      *| |* VeriSilicon.  No part of this work may be disclosed, reproduced, copied,   *| |* transmitted, or used in any way for any purpose, without the express       *| |* written permission of VeriSilicon.                                         *| |*                                                                            *|
-\******************************************************************************/
-
 #include <ebase/types.h>
 #include <ebase/trace.h>
 #include <ebase/builtins.h>
@@ -78,20 +75,18 @@ static struct vvcam_mode_info psc2310_mode_info[] = {
         .mipi_line_num = 2,
         .preg_data = (void *)"sc2310 sensor liner mode, raw10, img resolution is 1920*1080",
     },
-    /*
     {
-        .index = 3,
-        .width = 1920,
-        .height = 1088,
-        .fps      = 30,
-        .hdr_mode = SENSOR_MODE_LINEAR,
+        .index     = 3,
+        .width     = 1440,
+        .height    = 1080,
+        .fps       = 30,
+        .hdr_mode  = SENSOR_MODE_LINEAR,
         .bit_width = 10,
         .bayer_pattern = BAYER_BGGR,
-        .mipi_phy_freq = 445, //mbps
+        .mipi_phy_freq = 320, //mbps
         .mipi_line_num = 2,
-        .preg_data = (void *)"sc2310 sensor liner mode, raw10, img resolution is 1920*1080",
+        .preg_data = (void *)"sc2310 sensor liner mode, raw10, img resolution is 1440*1080",
     },
-    */
 };
 
 static RESULT SC2310_IsiRegisterWriteIss(IsiSensorHandle_t handle, const uint32_t address, const uint32_t value);
@@ -476,7 +471,10 @@ static RESULT SC2310_IsiCreateSensorIss(IsiSensorInstanceConfig_t * pConfig) {
                 strcat(pSC2310Ctx->SensorRegCfgFile,
                     "SC2310_mipi2lane_1920x1080_raw10_30fps_init.txt");
                 break;
-
+            case 3:
+                strcat(pSC2310Ctx->SensorRegCfgFile,
+                    "SC2310_mipi2lane_1440x1080_raw12_30fps_init.txt");
+                break;
             default:
                 break;
         }
@@ -632,6 +630,15 @@ static RESULT SC2310_IsiInitSensorIss(IsiSensorHandle_t handle) {
                 pSC2310Ctx->AecMaxGain = 35;
                 pSC2310Ctx->AecMinGain = 1;
                 break;
+            case 3:
+                pSC2310Ctx->one_line_exp_time = 1.0 / (2 * 0x465 - 6.0) / 30.0;
+                pSC2310Ctx->FrameLengthLines = 2 * 0x465;
+                pSC2310Ctx->CurFrameLengthLines = pSC2310Ctx->FrameLengthLines;
+                pSC2310Ctx->MaxIntegrationLine = pSC2310Ctx->CurFrameLengthLines - 6;
+                pSC2310Ctx->MinIntegrationLine = 3;
+                pSC2310Ctx->AecMaxGain = 35;
+                pSC2310Ctx->AecMinGain = 1;
+                break;
 
             default:
                 return ( RET_NOTAVAILABLE );
@@ -759,19 +766,26 @@ static RESULT SC2310_IsiSensorSetStreamingIss
     if (pSC2310Ctx->Configured != BOOL_TRUE)
         return RET_WRONG_STATE;
 
-    ret = SC2310_IsiRegisterWriteIss(handle, 0x3812, 0);
-    if (ret != 0) {
-        return (RET_FAILURE);
-    }
+    if (on == 0) {
+        ret = SC2310_IsiRegisterWriteIss(handle, 0x3812, 0);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
 
-    ret = SC2310_IsiRegisterWriteIss(handle, 0x100, on);
-    if (ret != 0) {
-        return (RET_FAILURE);
-    }
+        ret = SC2310_IsiRegisterWriteIss(handle, 0x100, on);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
 
-    ret = SC2310_IsiRegisterWriteIss(handle, 0x3812, 0x30);
-    if (ret != 0) {
-        return (RET_FAILURE);
+        ret = SC2310_IsiRegisterWriteIss(handle, 0x3812, 0x30);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
+    } else {
+        ret = SC2310_IsiRegisterWriteIss(handle, 0x100, on);
+        if (ret != 0) {
+            return (RET_FAILURE);
+        }
     }
 
     pSC2310Ctx->Streaming = on;

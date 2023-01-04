@@ -72,13 +72,14 @@ add_definitions(-DMRV_STITCHING_VERSION=2)
 
 add_compile_options(-Werror=implicit-function-declaration)
 
+set(DEPEND_LIBS
+    isi
+    hal
+)
+
 add_subdirectory(IMX219)
 add_subdirectory(SC2310)
 add_subdirectory(SC132GS)
 add_subdirectory(GC5035)
 add_subdirectory(GC02M1B)
 add_subdirectory(IMX334)
-
-link_libraries(${PROJECT_NAME} isi )
-
-#target_link_libraries()
