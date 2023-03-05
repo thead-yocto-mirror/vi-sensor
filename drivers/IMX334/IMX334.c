@@ -66,6 +66,7 @@ static struct vvcam_mode_info pIMX334_mode_info[] = {
 		.bayer_pattern = 3,
         .mipi_phy_freq = 800, //mbps
         .mipi_line_num = 4,
+        .config_file_3a = "IMX334_3864x2180_raw12", //3aconfig_IMX334_3864x2180_raw12.json
         .preg_data = (void *)"imx334 3864x2180",
 	},
     /*
@@ -214,6 +215,7 @@ static RESULT IMX334_IsiSensorGetClkIss(IsiSensorHandle_t handle, uint32_t * pcl
 static RESULT IMX334_IsiConfigSensorSCCBIss(IsiSensorHandle_t handle)
 {
     RESULT result = RET_SUCCESS;
+    return result;
     int ret = 0;
     TRACE(IMX334_INFO, "%s (enter)\n", __func__);
 

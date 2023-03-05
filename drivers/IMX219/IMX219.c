@@ -52,6 +52,7 @@ static struct vvcam_mode_info pimx219_mode_info[] = {
         .bayer_pattern = BAYER_RGGB,
         .mipi_phy_freq = 912, /* Pixel rate is fixed at 182.4M for all the modes */
         .mipi_line_num = 2,
+        .config_file_3a = "IMX219_1920x1080_raw10",  //3aconfig_IMX219_1920x1080_raw10.json
         .preg_data = (void *)"imx219 sensor liner mode 1920*1080@30",
     },
 };

@@ -8,10 +8,10 @@
             "classname" : "Aev2",
             "enable" : true,
             "motionThreshold" : 0.5,
-            "roiWeight" : 0.6,
-            "motionFilter" : 0.5,
-            "maxSensorAgain" : 10.66,
-            "maxSensorDgain" : 15.85,
+            "faceWeight" : 0.6,
+            "motionFilter"  : 0.5,
+            "maxSensorAgain" : 15.5,
+            "maxSensorDgain" : 1,
             "maxIspDgain" : 2.5,
             "setPoint" : 50,
             "roi_start" : 8,
@@ -62,7 +62,11 @@
             "indoor" : [1, 1, 1, 1, 1, 1, 1],
             "outdoor" : [1, 1, 1, 1, 1, 1, 1],
             "transition" : [1, 1, 1, 1, 1, 1, 1],
-            "avg" : 0
+            "lsc_ratio":{
+                "gains" : [1, 2, 4, 8, 16, 32],
+                "vignetting" : [1, 1, 1, 0.9, 0.8, 0.7]
+            },
+            "avg" : 0.0
         },
         {
             "classname" : "IspController",
@@ -510,6 +514,25 @@
                     "hdr" : true,
                     "gains" : [1, 16],
                     "blc" : [64, 64]
+                }
+            ]
+        },
+        {
+            "classname" : "AGe",
+            "forcecreate" : true,
+            "enable" : false,
+            "tables" : [
+                {
+                    "hdr" : false,
+                    "gains" : [1, 16],
+                    "threshold" : [0, 0],
+                    "dummyline" : [100, 100]
+                },
+                {
+                    "hdr" : true,
+                    "gains" : [1, 16],
+                    "threshold" : [0, 0],
+                    "dummyline" : [100, 100]
                 }
             ]
         }

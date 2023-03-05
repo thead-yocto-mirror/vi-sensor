@@ -637,7 +637,7 @@ static RESULT SC132GS_IsiInitSensorIss(IsiSensorHandle_t handle) {
         switch(pSC132GSCtx->SensorMode.index)
         {
             case 0:
-                pSC132GSCtx->one_line_exp_time = 1;
+                pSC132GSCtx->one_line_exp_time = 0.81257f; //us 1/16  * line_time
                 pSC132GSCtx->FrameLengthLines = (0x546 - 8) * 16;
                 pSC132GSCtx->CurFrameLengthLines = pSC132GSCtx->FrameLengthLines;
                 pSC132GSCtx->MaxIntegrationLine = pSC132GSCtx->CurFrameLengthLines - 3;
@@ -646,7 +646,7 @@ static RESULT SC132GS_IsiInitSensorIss(IsiSensorHandle_t handle) {
                 pSC132GSCtx->AecMinGain = 1;
                 break;
             case 1:
-                pSC132GSCtx->one_line_exp_time = 1;
+                pSC132GSCtx->one_line_exp_time = 0.81257f; //us 1/16  * line_time
                 pSC132GSCtx->FrameLengthLines = (0x546 - 8) * 16;
                 pSC132GSCtx->CurFrameLengthLines = pSC132GSCtx->FrameLengthLines;
                 pSC132GSCtx->MaxIntegrationLine = pSC132GSCtx->CurFrameLengthLines - 3;
@@ -655,7 +655,7 @@ static RESULT SC132GS_IsiInitSensorIss(IsiSensorHandle_t handle) {
                 pSC132GSCtx->AecMinGain = 1;
                 break;
             case 2:
-                pSC132GSCtx->one_line_exp_time = 1;
+                pSC132GSCtx->one_line_exp_time = 0.81257f; //us 1/16  * line_time
                 pSC132GSCtx->FrameLengthLines = (0x546 - 8) * 16;
                 pSC132GSCtx->CurFrameLengthLines = pSC132GSCtx->FrameLengthLines;
                 pSC132GSCtx->MaxIntegrationLine = pSC132GSCtx->CurFrameLengthLines - 3;
@@ -664,7 +664,7 @@ static RESULT SC132GS_IsiInitSensorIss(IsiSensorHandle_t handle) {
                 pSC132GSCtx->AecMinGain = 1;
                 break;
             case 3:
-                pSC132GSCtx->one_line_exp_time = 1;
+                pSC132GSCtx->one_line_exp_time = 0.81257f; //us 1/16  * line_time
                 pSC132GSCtx->FrameLengthLines = (0x546 - 8) * 16;
                 pSC132GSCtx->CurFrameLengthLines = pSC132GSCtx->FrameLengthLines;
                 pSC132GSCtx->MaxIntegrationLine = pSC132GSCtx->CurFrameLengthLines - 3;
@@ -673,7 +673,7 @@ static RESULT SC132GS_IsiInitSensorIss(IsiSensorHandle_t handle) {
                 pSC132GSCtx->AecMinGain = 1;
                 break;
             case 4:
-                pSC132GSCtx->one_line_exp_time = 1;
+                pSC132GSCtx->one_line_exp_time = 0.81257f; //us 1/16  * line_time
                 pSC132GSCtx->FrameLengthLines = (0x546 - 8) * 16;
                 pSC132GSCtx->CurFrameLengthLines = pSC132GSCtx->FrameLengthLines;
                 pSC132GSCtx->MaxIntegrationLine = pSC132GSCtx->CurFrameLengthLines - 3;
@@ -682,7 +682,7 @@ static RESULT SC132GS_IsiInitSensorIss(IsiSensorHandle_t handle) {
                 pSC132GSCtx->AecMinGain = 1;
                 break;
             case 5:
-                pSC132GSCtx->one_line_exp_time = 1;
+                pSC132GSCtx->one_line_exp_time = 0.81257f; //us 1/16  * line_time
                 pSC132GSCtx->FrameLengthLines = (0x546 - 8) * 16;
                 pSC132GSCtx->CurFrameLengthLines = pSC132GSCtx->FrameLengthLines;
                 pSC132GSCtx->MaxIntegrationLine = pSC132GSCtx->CurFrameLengthLines - 3;
@@ -1343,26 +1343,35 @@ RESULT SC132GS_IsiSetIntegrationTimeIss
      uint8_t * pNumberOfFramesToSkip, float *hdr_ratio)
 {
     RESULT result = RET_SUCCESS;
+    uint32_t exp_lines = 0;
 
     SC132GS_Context_t *pSC132GSCtx = (SC132GS_Context_t *) handle;
     HalContext_t *pHalCtx = (HalContext_t *) pSC132GSCtx->IsiCtx.HalHandle;
 
-    // 曝光时间小于3ms
-    if (NewIntegrationTime > 3692.0f) {
-        NewIntegrationTime = 3692.0f;
+    NewIntegrationTime *= 1000000;  //us
+
+    // 曝光时间小于3ms, 对应到寄存器值3692
+    //if (NewIntegrationTime > 3000) {
+    //    NewIntegrationTime = 3000;
+    //}
+    // time to lines
+    exp_lines = NewIntegrationTime / pSC132GSCtx->one_line_exp_time;
+
+    if (exp_lines > pSC132GSCtx->FrameLengthLines) {
+        exp_lines = pSC132GSCtx->FrameLengthLines;
     }
 
     //行长 = 寄存器{16‘h320c, 16′h320d}值*2
     //2*{16’h320e,16’h320f}-6:h320e,h320f为帧长
-    uint32_t hval_time =  (((uint32_t)NewIntegrationTime) & 0xf0000) >> 16;
-    uint32_t mval_time =  (((uint32_t)NewIntegrationTime) & 0xff00) >> 8;
-    uint32_t lval_time =  ((uint32_t)NewIntegrationTime) & 0xff;
+    uint32_t hval_time =  (exp_lines & 0xf0000) >> 16;
+    uint32_t mval_time =  (exp_lines & 0xff00) >> 8;
+    uint32_t lval_time =  exp_lines & 0xff;
 
     result = SC132GS_IsiRegisterWriteIss(handle, 0x3e00, hval_time);
     result = SC132GS_IsiRegisterWriteIss(handle, 0x3e01, mval_time);
     result = SC132GS_IsiRegisterWriteIss(handle, 0x3e02, lval_time);
 
-    pSC132GSCtx->AecCurIntegrationTime = NewIntegrationTime;
+    pSC132GSCtx->AecCurIntegrationTime = exp_lines * pSC132GSCtx->one_line_exp_time;
     *pNumberOfFramesToSkip = 1U;
     *pSetIntegrationTime = pSC132GSCtx->AecCurIntegrationTime;
 

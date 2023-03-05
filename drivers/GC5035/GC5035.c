@@ -52,6 +52,7 @@ static struct vvcam_mode_info pgc5035_mode_info[] = {
         .bayer_pattern = BAYER_GRBG,
         .mipi_phy_freq = 438, //mbps
         .mipi_line_num = 2,
+        .config_file_3a = "GC5035_640x480_raw10",  //3aconfig_GC5035_640x480_raw10.json
         .preg_data = (void *)"gc5035 sensor liner mode 640*480@30",
     },
     {
@@ -64,6 +65,7 @@ static struct vvcam_mode_info pgc5035_mode_info[] = {
         .bayer_pattern = BAYER_RGGB,
         .mipi_phy_freq = 876, //mbps
         .mipi_line_num = 2,
+        .config_file_3a = "GC5035_1920x1080_raw10",  //3aconfig_GC5035_1920x1080_raw10.json
         .preg_data = (void *)"gc5035 sensor liner mode 1920*1080@30",
     },
     {
@@ -76,6 +78,7 @@ static struct vvcam_mode_info pgc5035_mode_info[] = {
         .bayer_pattern = BAYER_RGGB,
         .mipi_phy_freq = 876, //mbps
         .mipi_line_num = 2,
+        .config_file_3a = "GC5035_2592x1944_raw10",  //3aconfig_GC5035_2592x1944_raw10.json		
         .preg_data = (void *)"gc5035 sensor liner mode 2592*1944@30",
     },
     {
@@ -87,7 +90,8 @@ static struct vvcam_mode_info pgc5035_mode_info[] = {
         .bit_width = 10,
         .bayer_pattern = BAYER_RGGB,
         .mipi_phy_freq = 438,
-        .mipi_line_num = 2,        
+        .mipi_line_num = 2,  
+        .config_file_3a = "GC5035_1296x972_raw10",  //3aconfig_GC5035_1296x972_raw10.json		
         .preg_data = (void *)"gc5035 sensor liner mode 1296*972@30",
     },
     {
@@ -99,7 +103,8 @@ static struct vvcam_mode_info pgc5035_mode_info[] = {
         .bit_width = 10,
         .bayer_pattern = BAYER_RGGB,
         .mipi_phy_freq = 438, //COULD BE WRONG
-        .mipi_line_num = 2,                
+        .mipi_line_num = 2,   
+        .config_file_3a = "GC5035_1280x720_raw10",  //3aconfig_GC5035_1280x720_raw10.json		
         .preg_data = (void *)"gc5035 sensor liner mode 1280*720@30",
     },
 #if 0
@@ -112,7 +117,8 @@ static struct vvcam_mode_info pgc5035_mode_info[] = {
         .bit_width = 10,
         .bayer_pattern = BAYER_RGGB,
         .mipi_phy_freq = 438, //COULD BE WRONG
-        .mipi_line_num = 2,          
+        .mipi_line_num = 2,    
+        .config_file_3a = "GC5035_1280x720_raw10",  //3aconfig_GC5035_1280x720_raw10.json		
         .preg_data = (void *)"gc5035 sensor liner mode 1280*720@60",
     }
 #endif

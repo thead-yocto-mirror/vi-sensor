@@ -49,6 +49,7 @@ static struct vvcam_mode_info psc2310_mode_info[] = {
         .bayer_pattern = BAYER_BGGR, //BAYER_RGGB, //BAYER_BGGR, //BAYER_GBRG, //, // BAYER_GRBG,
         .mipi_phy_freq = 395, //mbps
         .mipi_line_num = 2,
+        .config_file_3a = NULL,
         .preg_data = (void *)"sc2310 sensor liner mode, raw12, img resolution is 640*480",
     },
     {
@@ -61,6 +62,7 @@ static struct vvcam_mode_info psc2310_mode_info[] = {
         .bayer_pattern = BAYER_BGGR, //BAYER_RGGB, //BAYER_BGGR, //, //,  // BAYER_GRBG,
         .mipi_phy_freq = 395, //mbps
         .mipi_line_num = 2,
+        .config_file_3a = "SC2310_1920x1088_raw12", //3aconfig_SC2310_1920x1088_raw12.json
         .preg_data = (void *)"sc2310 sensor liner mode, raw12, img resolution is 1920*1088",
     },
     {
@@ -73,6 +75,7 @@ static struct vvcam_mode_info psc2310_mode_info[] = {
         .bayer_pattern = BAYER_BGGR,
         .mipi_phy_freq = 371, //mbps
         .mipi_line_num = 2,
+        .config_file_3a = NULL,
         .preg_data = (void *)"sc2310 sensor liner mode, raw10, img resolution is 1920*1080",
     },
     {
@@ -85,6 +88,7 @@ static struct vvcam_mode_info psc2310_mode_info[] = {
         .bayer_pattern = BAYER_BGGR,
         .mipi_phy_freq = 320, //mbps
         .mipi_line_num = 2,
+        .config_file_3a = "SC2310_1440x1080_raw10",  //3aconfig_SC2310_1440x1080_raw10.json
         .preg_data = (void *)"sc2310 sensor liner mode, raw10, img resolution is 1440*1080",
     },
 };
@@ -274,38 +278,6 @@ static RESULT SC2310_IsiSensorGetClkIss
 static RESULT SC2310_IsiConfigSensorSCCBIss(IsiSensorHandle_t handle)
 {
     RESULT result = RET_SUCCESS;
-    int ret = 0;
-    TRACE(SC2310_INFO, "%s (enter)\n", __func__);
-
-    SC2310_Context_t *pSC2310Ctx = (SC2310_Context_t *) handle;
-    if (pSC2310Ctx == NULL || pSC2310Ctx->IsiCtx.HalHandle == NULL) {
-        return RET_NULL_POINTER;
-    }
-
-    HalContext_t *pHalCtx = (HalContext_t *) pSC2310Ctx->IsiCtx.HalHandle;
-
-    static const IsiSccbInfo_t SensorSccbInfo = {
-        .slave_addr = (0x30),  //0x30 or 0x32
-        .addr_byte = 2,
-        .data_byte = 1,
-    };
-
-    struct vvcam_sccb_cfg_s sensor_sccb_config;
-    sensor_sccb_config.slave_addr = SensorSccbInfo.slave_addr;
-    sensor_sccb_config.addr_byte = SensorSccbInfo.addr_byte;
-    sensor_sccb_config.data_byte = SensorSccbInfo.data_byte;
-
-    ret = ioctl(pHalCtx->sensor_fd, VVSENSORIOC_SENSOR_SCCB_CFG,
-          &sensor_sccb_config);
-    if (ret != 0) {
-        TRACE(SC2310_ERROR, "%s: sensor config sccb info error!\n",
-              __func__);
-        return (RET_FAILURE);
-    }
-
-    TRACE(SC2310_INFO, "%s (exit) result = %d\n", __func__, result);
-    return (result);
-
     return RET_SUCCESS;
 }
 #endif
@@ -473,7 +445,7 @@ static RESULT SC2310_IsiCreateSensorIss(IsiSensorInstanceConfig_t * pConfig) {
                 break;
             case 3:
                 strcat(pSC2310Ctx->SensorRegCfgFile,
-                    "SC2310_mipi2lane_1440x1080_raw12_30fps_init.txt");
+                    "SC2310_mipi2lane_1440x1080_raw10_30fps_init.txt");
                 break;
             default:
                 break;
@@ -714,24 +686,6 @@ static RESULT SC2310_IsiSetupSensorIss
 
     memcpy(&pSC2310Ctx->Config, pConfig, sizeof(IsiSensorConfig_t));
 
-    /* 1.) SW reset of image sensor (via I2C register interface)  be careful, bits 6..0 are reserved, reset bit is not sticky */
-    TRACE(SC2310_DEBUG, "%s: SC2310 System-Reset executed\n", __func__);
-    osSleep(100);
-
-    //SC2310_AecSetModeParameters not defined yet as of 2021/8/9.
-    //result = SC2310_AecSetModeParameters(pSC2310Ctx, pConfig);
-    //if (result != RET_SUCCESS) {
-    //    TRACE(SC2310_ERROR, "%s: SetupOutputWindow failed.\n",
-    //          __func__);
-    //    return (result);
-    //}
-#if 1
-    struct sc2310_fmt fmt;
-    fmt.width = pConfig->Resolution.width;
-    fmt.height = pConfig->Resolution.height;
-
-    ioctl(pHalCtx->sensor_fd, VVSENSORIOC_S_FPS, &fmt);//result = ioctl(pHalCtx->sensor_fd, VVSENSORIOC_S_FPS, &fmt);
-#endif
     pSC2310Ctx->Configured = BOOL_TRUE;
     TRACE(SC2310_INFO, "%s: (exit) ret=0x%x \n", __func__, result);
     return result;
